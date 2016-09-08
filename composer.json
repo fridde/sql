@@ -1,0 +1,19 @@
+{
+    "name": "fridde/sql",
+    "description": "",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "fridde",
+            "email": "f@hehl.se"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.0",
+        "phpixie/database": "^3.2"        
+    },
+    "autoload": {
+        "psr-4": { "Fridde\\": "src/" }
+    },
+    "minimum-stability": "dev"
+}
