@@ -1,7 +1,7 @@
 <?php
-	
+
 	namespace Fridde;
-	
+
 	class SQL extends \PHPixie\Database
 	{
 		private $settings;
@@ -9,19 +9,19 @@
 		public $conn;
 		public $query;
 		public $table_name;
-		
-		
+
+
 		function __construct ()
 		{
 			$this->setConfiguration();
 			$slice = new \PHPixie\Slice();
 			parent::__construct($slice->arrayData($this->settings));
-			$this->conn = $this->get("default");								
+			$this->conn = $this->get("default");
 		}
-		
+
 		public function setConfiguration()
 		{
-			
+
 			$file_name = $this->settings_file;
 			$toml_class = "Yosymfony\Toml\Toml";
 			if(is_readable($file_name)){
@@ -36,7 +36,7 @@
 			else {
 				throw new \Exception("File <" . $file_name . "> not readable or doesn't exist.");
 			}
-			
+
 			$det = $settings["Connection_Details"] ?? false;
 			if(!$det){
 				throw new \Exception("No connection details found in the configuration file");
@@ -53,29 +53,29 @@
 			$this->setTable($def_table);
 			$this->settings = $config;
 		}
-		
+
 		public function setTable($table)
 		{
 			$this->table_name = $table;
 		}
-		
-		
-		
-		
+
+
+
+
 		public function select()
 		{
 			return $this->defineQuery("select");
 		}
-		
+
 		/**
 			* [Summary].
 			*
 			* [Description]
-			
+			*
 			* @param [boolean] $as_object_array (optional) If set to true, the array returned contains objects instead of arrays.
 			*
 			* @return [type] [name] [description]
-		*/ 
+		*/
 		public function fetch()
 		{
 			$args = func_get_args();
@@ -98,16 +98,16 @@
 			}
 			return $this->results;
 		}
-		
+
 		/**
 			* Executes a delete, insert or update-query. Can't be chained.
 			*
 			* [Description]
-			
+			*
 			* @param [Type] $[Name] [Argument description]
 			*
 			* @return [type] [name] [description]
-		*/ 
+		*/
 		public function ex()
 		{
 			$this->query->execute();
@@ -117,11 +117,11 @@
 			* [Summary].
 			*
 			* [Description]
-			
+			*
 			* @param [Type] $[Name] [Argument description]
 			*
 			* @return [type] [name] [description]
-		*/ 
+		*/
 		public function delete()
 		{
 			return $this->defineQuery("delete");
@@ -130,11 +130,11 @@
 			* [Summary].
 			*
 			* [Description]
-			
+			*
 			* @param [Type] $[Name] [Argument description]
 			*
 			* @return [type] [name] [description]
-		*/ 
+		*/
 		public function insert($data)
 		{
 			$data = $this->prepareDataForInsert($data);
@@ -146,19 +146,19 @@
 			* Converts data to conform to PHPixie\Database's insertQuery->batchData()
 			*
 			* [Description]
-			
+			*
 			* @param [Type] $[Name] [Argument description]
 			*
 			* @return [type] [name] [description]
-		*/ 
+		*/
 		public function prepareDataForInsert($data)
 		{
 			if($data == "" || count($data) == 0){
 				throw new \Exception("data for insertion was empty");
 			}
 			$return_data = [[], []];
-			
-			
+
+
 			$data_values = array_values($data);
 			$data_keys = array_keys($data);
 			$first_is_array = is_array($data_values[0]);
@@ -169,19 +169,19 @@
 			/* $data is given as batch data
 				Example: $data = [["id" => 1, "name" => "Adam", "job" => "zoo keeper"], ["id" => 2, "name" => "Eve", "job" => "gardener"]], where column names are repeated
 			*/
-			if($first_is_array && $column_names_as_keys){  
+			if($first_is_array && $column_names_as_keys){
 				$return_data[0] = array_keys($data_values[0]);
 				$return_data[1] = array_map("array_values", $data);
 			}
 			/* $data is given as batch data, but with the first array containing the indices, and the second array containing the data (without keys)
 				Example: $data = [["id", "name", "job"],[[1, "Adam", "zoo keeper"], [2, "Eve", "gardener"]]]
-			*/ 
+			*/
 			else if(count($data) == 2 && $first_is_array && is_array($data_values[1][0])){
 				$return_data = $data;
 			}
-			/* $data is given as a single row. 
+			/* $data is given as a single row.
 				Example: $data = ["id" => 1, "name" => "Adam", "job" => "zoo keeper"]
-			*/ 
+			*/
 			else if(!$first_is_array){
 				$return_data[0] = $data_keys;
 				$return_data[1] = [$data_values];
@@ -189,58 +189,56 @@
 			else {
 				throw new \Exception("The insert argument didn't conform to the standards. See documentation for PHPixie/Database's insertQuery->batchData().");
 			}
-			
+
 			return $return_data;
 		}
-		
+
 		/**
 			* [Summary].
 			*
 			* [Description]
-			
+			*
 			* @param [Type] $[Name] [Argument description]
 			*
 			* @return [type] [name] [description]
-		*/ 
+		*/
 		public function count()
 		{
 			return $this->defineQuery("count");
 		}
-		
+
 		public function update()
 		{
 			return $this->defineQuery("update");
 		}
-		
-		
+
+
 		private function defineQuery($type)
 		{
 			if($this->table_name){
 				$query_name = $type . "Query";
-				$this->query = $this->conn->$query_name()->table($this->table_name);				
+				$this->query = $this->conn->$query_name()->table($this->table_name);
 			}
 			else {
 				throw new \Exception("No table name defined for the query.");
 			}
 			return $this->query;
 		}
-		
+
 		/**
 			* [Summary].
 			*
-			
-			* [Description]
-			
-			
-			* @param array $data The input data. Each row MUST be given as an associative array, i.e. $data = [["id" => "2", "name" => "Adam"],["name" => "Eve"]]
 			*
-			
+			* [Description]
+			*
+			* @param array $data The input data. Each row MUST be given as an associative array, i.e. $data = [["id" => "2", "name" => "Adam"],["name" => "Eve"]]
+			*			
 			* @return [type] [name] [description]
-		*/ 
+		*/
 		public function updateOrInsert($data, $id_column = "id")
 		{
 			// TODO: fix this so it works
-			
+
 			//$data = $this->prepareDataForInsert($data);
 			$insert_array = array();
 			foreach($data as $row){
@@ -270,7 +268,7 @@
 				$this->insert($insert_array);
 			}
 		}
-		
+
 		/**
 			* [Summary].
 			*
@@ -303,7 +301,7 @@
 			}
 			return $values;
 		}
-		
+
 		public function getColumnNames($table = null)
 		{
 			$this->conn = $this->get("info");
@@ -315,5 +313,5 @@
 			$results = array_map(function($i){return $i["COLUMN_NAME"];}, $results);
 			return $results;
 		}
-		
-	}																																																																															
+
+	}
