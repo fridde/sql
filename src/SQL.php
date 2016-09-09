@@ -5,7 +5,6 @@
 	class SQL extends \PHPixie\Database
 	{
 		private $settings;
-		public $settings_file = "settings.toml";
 		public $conn;
 		public $query;
 		public $table_name;
@@ -19,22 +18,11 @@
 			$this->conn = $this->get("default");
 		}
 
-		public function setConfiguration()
+		public function setConfiguration($settings = null)
 		{
-
-			$file_name = $this->settings_file;
-			$toml_class = "Yosymfony\Toml\Toml";
-			if(is_readable($file_name)){
-				if(class_exists($toml_class)){
-					$parseFunction = $toml_class . "::Parse";
-					$settings = $parseFunction($file_name);
-				}
-				else {
-					throw new \Exception("Tried to parse a toml-configuration file without a parser class defined.");
-				}
-			}
-			else {
-				throw new \Exception("File <" . $file_name . "> not readable or doesn't exist.");
+			$settings = $settings ?? ($GLOBALS["SETTINGS"] ?? false);
+			if($settings === false){
+				throw new \Exception("No settings given or found in the global scope");
 			}
 
 			$det = $settings["Connection_Details"] ?? false;
@@ -232,7 +220,7 @@
 			* [Description]
 			*
 			* @param array $data The input data. Each row MUST be given as an associative array, i.e. $data = [["id" => "2", "name" => "Adam"],["name" => "Eve"]]
-			*			
+			*
 			* @return [type] [name] [description]
 		*/
 		public function updateOrInsert($data, $id_column = "id")
