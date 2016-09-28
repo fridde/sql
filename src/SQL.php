@@ -67,7 +67,7 @@
 		public function fetch()
 		{
 			$args = func_get_args();
-			$this->query = (isset($this->query) ? $this->query : $this->select());
+			$this->query = $this->query ?? $this->select();
 			$this->query = $this->query->execute();
 			if(count($args) == 0){
 				$this->results = array_map(function($obj){return (array) $obj;}, $this->query->asArray());
