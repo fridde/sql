@@ -2,6 +2,8 @@
 
 	namespace Fridde;
 
+	// TODO: Rewrite this with illuminate/database
+
 	class SQL extends \PHPixie\Database
 	{
 		private $settings;
