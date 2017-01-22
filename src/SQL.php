@@ -2,7 +2,7 @@
 
 	namespace Fridde;
 
-	// TODO: Rewrite this with illuminate/database
+	// TODO: Rewrite this with illuminate/database or doctrine/orm
 
 	class SQL extends \PHPixie\Database
 	{
